@@ -6,12 +6,14 @@
     <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png">
   </picture>
 
-  <a href="https://huggingface.co/kandinskylab/KVAE-Audio">🤗Hugging Face</a> | <a href="https://github.com/kandinskylab/kvae">KVAE GitHub</a> | <a href="https://habr.com/ru/companies/sberbank/articles/1053410/">Habr Article</a> | <a href="https://kandinskylab.ai/">Project Page</a> | <a href="https://huggingface.co/papers/2608.05798">Technical Report</a>
+  <a href="https://huggingface.co/kandinskylab/KVAE-Audio">🤗Hugging Face</a> | <a href="https://huggingface.co/docs/diffusers/main/en/api/models/autoencoder_kl_kvae_audio">🧨Diffusers</a> | <a href="https://github.com/kandinskylab/kvae">KVAE GitHub</a> | <a href="https://habr.com/ru/companies/sberbank/articles/1053410/">Habr Article</a> | <a href="https://kandinskylab.ai/">Project Page</a> | <a href="https://huggingface.co/papers/2608.05798">Technical Report</a>
 </div>
 
 <h1>KVAE-Audio</h1>
 
 **KVAE-Audio** is a continuous, full-band (48 kHz) audio autoencoder. It compresses raw waveforms into compact continuous latents and reconstructs them with high fidelity across speech, music, and general sound. The model is designed not only for faithful reconstruction, but as a _latent space for generative models_ — in our internal text-to-audio pipeline, swapping the autoencoder for KVAE-Audio improves generation quality under a fixed generator.
+
+**KVAE-Audio is now available in Hugging Face Diffusers 🤗🧨** as [`AutoencoderKLKVAEAudio`](https://huggingface.co/docs/diffusers/main/en/api/models/autoencoder_kl_kvae_audio).
 
 ## Inference instruction
 
