@@ -29,7 +29,7 @@ def infer_signal(
     generator: KVAEAudio,
 ) -> AudioSignal:
     signal = signal.to(device)
-    output = generator(signal.audio_data, signal.sample_rate)["audio"]
+    output = generator(signal.audio_data)["audio"]
     recons = AudioSignal(output, signal.sample_rate)
     recons = recons.normalize(signal.loudness())
     return recons.cpu()

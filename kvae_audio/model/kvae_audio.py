@@ -140,13 +140,12 @@ class KVAEAudio(BaseModel, CodecMixin):
         self,
         encoder_dim: int = 64,
         encoder_rates: List[int] = [2, 3, 4, 5, 8],
-        latent_dim: int = None,
+        latent_dim: int = 2048,
         codebook_dim: Union[int, list] = 64,
         decoder_dim: int = 1536,
         decoder_rates: List[int] = [8, 5, 4, 3, 2],
         sample_rate: int = 48000,
         num_channels: int = 1,
-        use_attn: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -156,9 +155,7 @@ class KVAEAudio(BaseModel, CodecMixin):
         self.decoder_dim = decoder_dim
         self.decoder_rates = decoder_rates
         self.sample_rate = sample_rate
-
-        if latent_dim is None:
-            latent_dim = encoder_dim * (2 ** len(encoder_rates))
+        self.num_channels = num_channels
 
         self.latent_dim = latent_dim
         if codebook_dim is None:
@@ -186,34 +183,23 @@ class KVAEAudio(BaseModel, CodecMixin):
 
         self.delay = self.get_delay()
 
-        self.use_attn = use_attn
-        if self.use_attn:
-            self.attn = nn.MultiheadAttention(latent_dim, 8, batch_first=True)
+        self.attn = nn.MultiheadAttention(latent_dim, 8, batch_first=True)
 
-    def preprocess(self, audio_data, sample_rate):
-        if sample_rate is None:
-            sample_rate = self.sample_rate
-        assert sample_rate == self.sample_rate
-
+    def preprocess(self, audio_data):
         length = audio_data.shape[-1]
         right_pad = math.ceil(length / self.hop_length) * self.hop_length - length
-        audio_data = nn.functional.pad(audio_data, (0, right_pad))
-
-        return audio_data
+        return nn.functional.pad(audio_data, (0, right_pad))
 
     def encode(
         self,
         audio_data: torch.Tensor,
-        sample_rate: int = None,
         sample: bool = False,
     ):
-        audio_data = self.preprocess(audio_data, sample_rate)
+        audio_data = self.preprocess(audio_data)
         q = self.encoder(audio_data)
-
-        if self.use_attn:
-            q = q.transpose(1, 2)
-            q, _ = self.attn(q, q, q)
-            q = q.transpose(1, 2)
+        q = q.transpose(1, 2)
+        q, _ = self.attn(q, q, q)
+        q = q.transpose(1, 2)
 
         h = self.in_proj(q)
         mu, logvar = torch.chunk(h, 2, dim=1)
@@ -239,12 +225,11 @@ class KVAEAudio(BaseModel, CodecMixin):
     def forward(
         self,
         audio_data: torch.Tensor,
-        sample_rate: int = None,
         sample: bool = False,
     ):
         length = audio_data.shape[-1]
 
-        z, mu, logvar, kl_loss = self.encode(audio_data, sample_rate, sample=sample)
+        z, mu, logvar, kl_loss = self.encode(audio_data, sample=sample)
         x = self.decode(z)
         return {
             "audio": x[..., :length],

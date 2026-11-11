@@ -74,7 +74,7 @@ python scripts/eval.py \
 
 ### Python API
 
-By default `encode` returns the mean latent (`mu`); pass `sample=True` for stochastic sampling. For end-to-end reconstruction, `model(waveform, sample_rate)["audio"]` is equivalent.
+By default `encode` returns the mean latent (`mu`); pass `sample=True` for stochastic sampling. For end-to-end reconstruction, `model(waveform)["audio"]` is equivalent. `sample_rate` is fixed on the model at 48 kHz.
 
 ```python
 import torch
@@ -89,7 +89,7 @@ waveform = torch.from_numpy(data).float().unsqueeze(0).unsqueeze(0)
 length = waveform.shape[-1]
 
 with torch.no_grad():
-    latents, _, _, _ = model.encode(waveform, sample_rate=sr)
+    latents, _, _, _ = model.encode(waveform)
     audio = model.decode(latents)[..., :length]
 
 sf.write("output.wav", audio.squeeze(0).T.numpy(), sr)
